@@ -1,0 +1,64 @@
+.contenedor-login {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--fondo) 0%, #1e3a5f 100%);
+}
+.tarjeta-login {
+  width: 100%;
+  max-width: 420px;
+  padding: 2.5rem;
+}
+.logo-farmacia {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+.logo-farmacia h1 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(135deg, var(--primario), #60a5fa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.logo-farmacia p {
+  color: var(--texto-apagado);
+  font-size: 0.9rem;
+}
+.grupo-formulario {
+  margin-bottom: 1.5rem;
+}
+.recordar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+.recordar label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--texto-apagado);
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+.recordar a {
+  color: var(--primario);
+  text-decoration: none;
+  font-size: 0.875rem;
+}
+.recordar a:hover {
+  text-decoration: underline;
+}
+.boton-login {
+  width: 100%;
+  padding: 0.875rem;
+  font-size: 1rem;
+  font-weight: 600;
+}
+.pie-login {
+  text-align: center;
+  margin-top: 1.5rem;
+  color: var(--texto-apagado);
+  font-size: 0.875rem;
+}
