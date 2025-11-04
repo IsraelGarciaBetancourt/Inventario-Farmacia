@@ -81,6 +81,7 @@
 		</dependency>
 
 
+
 <!-- JSTL API (Jakarta EE 9+) -->
 <dependency>
     <groupId>jakarta.servlet.jsp.jstl</groupId>
@@ -92,6 +93,7 @@
     <groupId>org.glassfish.web</groupId>
     <artifactId>jakarta.servlet.jsp.jstl</artifactId>
 </dependency>
+
 
  </dependencies>
 
