@@ -148,24 +148,3 @@ INSERT INTO documento_detalles
 VALUES (2, 3, 10, 2.50, 25.00, TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 
--- SALIDAS en días distintos (varias semanas)
-INSERT INTO documentos (tipo_movimiento, numero_documento, fecha, id_usuario, observacion, activo, created_at, updated_at)
-VALUES ('SALIDA', 'DOC-003', DATEADD('DAY', -25, CURRENT_DATE), 2, 'Venta 1', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO documento_detalles (id_documento, id_producto_catalogo, cantidad, precio_unitario, subtotal, activo, created_at, updated_at)
-VALUES (3, 1, 5, 2.50, 12.50, TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-
-INSERT INTO documentos (tipo_movimiento, numero_documento, fecha, id_usuario, observacion, activo, created_at, updated_at)
-VALUES ('SALIDA', 'DOC-004', DATEADD('DAY', -17, CURRENT_DATE), 2, 'Venta 2', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO documento_detalles (id_documento, id_producto_catalogo, cantidad, precio_unitario, subtotal, activo, created_at, updated_at)
-VALUES (4, 2, 8, 1.00, 8.00, TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-
-INSERT INTO documentos (tipo_movimiento, numero_documento, fecha, id_usuario, observacion, activo, created_at, updated_at)
-VALUES ('SALIDA', 'DOC-005', DATEADD('DAY', -3, CURRENT_DATE), 2, 'Venta 3', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO documento_detalles (id_documento, id_producto_catalogo, cantidad, precio_unitario, subtotal, activo, created_at, updated_at)
-VALUES (5, 3, 12, 2.50, 30.00, TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-
--- Opcional: ENTRADAS para comparar
-INSERT INTO documentos (tipo_movimiento, numero_documento, fecha, id_usuario, observacion, activo, created_at, updated_at)
-VALUES ('ENTRADA', 'DOC-006', DATEADD('DAY', -28, CURRENT_DATE), 1, 'Compra 1', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO documento_detalles (id_documento, id_producto_catalogo, cantidad, precio_unitario, subtotal, activo, created_at, updated_at)
-VALUES (6, 1, 70, 0.50, 35.00, TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
