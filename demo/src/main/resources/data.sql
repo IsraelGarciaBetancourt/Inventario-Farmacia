@@ -52,7 +52,7 @@ VALUES ('admin', 'admin123', 'Administrador Principal', 'ADMIN', TRUE, CURRENT_T
 
 INSERT INTO usuarios
 (username, password_hash, nombre_completo, rol, activo, created_at, updated_at)
-VALUES ('empleado1', 'empleado123', 'Empleado de Ventas', 'USER', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+VALUES ('almacenero', 'almacenero123', 'Almacenero', 'USER', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 
 -- ============================================

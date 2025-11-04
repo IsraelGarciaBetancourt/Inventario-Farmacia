@@ -31,7 +31,8 @@
     <a href="${pageContext.request.contextPath}/reportes"
        class="enlace-nav ${fn:contains(currentPath, '/reportes') ? 'activo' : ''}">📈 Reportes</a>
 
-    <a href="${pageContext.request.contextPath}/login"
-       class="enlace-nav ${fn:contains(currentPath, '/login') ? 'activo' : ''}">🚪 Cerrar Sesión</a>
+    <a href="${pageContext.request.contextPath}/logout"
+       class="enlace-nav"
+       onclick="return confirm('¿Seguro que deseas cerrar sesión?');">🚪 Cerrar Sesión</a>
   </nav>
 </aside>
