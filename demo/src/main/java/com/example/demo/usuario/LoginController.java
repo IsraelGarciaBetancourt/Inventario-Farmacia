@@ -14,14 +14,13 @@ public class LoginController {
         this.usuarioService = usuarioService;
     }
 
+    // ✅ Muestra la vista de login
     @GetMapping("/login")
-    public String mostrarLogin(HttpSession session) {
-        if (session.getAttribute("usuarioLogeado") != null) {
-            return "redirect:/inventario"; // ya logeado
-        }
-        return "login/login"; // JSP
+    public String mostrarLogin() {
+        return "login/login"; // 👈 Ajusta el path si tu JSP está en /WEB-INF/views/login/login.jsp
     }
 
+    // ✅ Procesa el envío del formulario
     @PostMapping("/login")
     public String procesarLogin(
             @RequestParam String username,
@@ -31,18 +30,21 @@ public class LoginController {
     ) {
         Usuario usuario = usuarioService.autenticar(username, password);
 
-        if (usuario == null) {
-            model.addAttribute("error", "Usuario o contraseña incorrectos");
-            return "login/login";
+        if (usuario == null || !usuario.isActivo()) {
+            model.addAttribute("error", "Usuario o contraseña incorrectos o usuario inactivo");
+            return "login/login"; // 👈 Redirige de nuevo al formulario
         }
 
-        session.setAttribute("usuarioLogeado", usuario);
+        // Guardar usuario completo en sesión
+        session.setAttribute("usuarioLogueado", usuario);
         session.setAttribute("nombreUsuario", usuario.getNombreCompleto());
         session.setAttribute("rolUsuario", usuario.getRol());
 
+        // Redirige al dashboard o inventario
         return "redirect:/inventario";
     }
 
+    // ✅ Cierre de sesión
     @GetMapping("/logout")
     public String logout(HttpSession session) {
         session.invalidate();

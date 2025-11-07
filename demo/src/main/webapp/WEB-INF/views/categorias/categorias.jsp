@@ -88,7 +88,8 @@
       </div>
 
       <div class="cuerpo-modal">
-        <form action="${pageContext.request.contextPath}/categorias/crear" method="post">
+        <!-- ⬇️ CORREGIDO: /categorias/guardar -->
+        <form action="${pageContext.request.contextPath}/categorias/guardar" method="post">
           <div class="grupo-formulario">
             <label for="nombre">Nombre</label>
             <input id="nombre" name="nombre" type="text" class="control-formulario" placeholder="Ej: Analgésicos" required>
@@ -113,7 +114,8 @@
         </div>
 
         <div class="cuerpo-modal">
-          <form id="form-editar" action="${pageContext.request.contextPath}/categorias/editar" method="post">
+          <!-- ⬇️ CORREGIDO: /categorias/actualizar -->
+          <form id="form-editar" action="${pageContext.request.contextPath}/categorias/actualizar" method="post">
             <input type="hidden" id="editar-id" name="id"> <!-- 👈 Campo oculto -->
             <div class="grupo-formulario">
               <label for="editar-nombre">Nombre</label>

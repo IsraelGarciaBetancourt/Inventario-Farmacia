@@ -22,11 +22,7 @@
         </div>
       </header>
 
-      <div class="flex justificar-entre items-centrado mb-2">
-        <h2>Productos</h2>
-        <button class="boton boton-primario"><a class="boton boton-primario" href="#modal-crear-producto">+ Nuevo Producto</a></button>
-      </div>
-
+      <!-- 🔍 BUSCADOR -->
       <div class="tarjeta">
         <h3 class="mb">🔍 Buscar Producto</h3>
         <div class="flex espacio flex-envolver">
@@ -38,15 +34,13 @@
             <label>Categoría</label>
             <select class="control-formulario">
               <option>-- Todas --</option>
-              <option>Analgésicos</option>
-              <option>Antibióticos</option>
-              <option>Antiinflamatorios</option>
-              <option>Vitaminas</option>
-              <option>Antihistamínicos</option>
+              <c:forEach var="cat" items="${categorias}">
+                <option>${cat.nombre}</option>
+              </c:forEach>
             </select>
           </div>
           <div class="grupo-formulario flex-1">
-            <label>Flag</label>
+            <label>Estado</label>
             <select class="control-formulario">
               <option>-- Todos --</option>
               <option>Activo</option>
@@ -57,6 +51,12 @@
         <button class="boton boton-primario">🔍 Buscar</button>
       </div>
 
+      <!-- 📋 LISTA DE PRODUCTOS -->
+      <div class="flex justificar-entre items-centrado mb-2">
+        <h2>Productos</h2>
+        <a class="boton boton-primario" href="#modal-crear-producto">+ Nuevo Producto</a>
+      </div>
+
       <div class="tarjeta">
         <table class="tabla">
           <thead>
@@ -64,92 +64,41 @@
               <th>Código</th>
               <th>Nombre</th>
               <th>Categoría</th>
-              <th>Presentación</th>
-              <th>Factor Base</th>
-              <th>Flag</th>
+              <th>Estado</th>
               <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td><strong>MED-001</strong></td>
-              <td>Paracetamol 500 mg</td>
-              <td>Analgésicos</td>
-              <td>Caja de 10</td>
-              <td><strong>10</strong></td>
-              <td><span class="insignia insignia-exito">Activo</span></td>
-              <td>
-                <button class="boton"><a href="#modal-editar-producto">Editar</a></button>
-                <button class="boton boton-peligro">Desactivar</button>
-              </td>
-            </tr>
-            <tr>
-              <td><strong>MED-002</strong></td>
-              <td>Paracetamol 500 mg</td>
-              <td>Analgésicos</td>
-              <td>Blíster</td>
-              <td><strong>1</strong></td>
-              <td><span class="insignia insignia-exito">Activo</span></td>
-              <td>
-                <button class="boton">Editar</button>
-                <button class="boton boton-peligro">Desactivar</button>
-              </td>
-            </tr>
-            <tr>
-              <td><strong>MED-003</strong></td>
-              <td>Jarabe de Tos 120 ml</td>
-              <td>Antitusivos</td>
-              <td>Frasco</td>
-              <td><strong>1</strong></td>
-              <td><span class="insignia insignia-exito">Activo</span></td>
-              <td>
-                <button class="boton">Editar</button>
-                <button class="boton boton-peligro">Desactivar</button>
-              </td>
-            </tr>
-            <tr>
-              <td><strong>MED-004</strong></td>
-              <td>Jarabe de Tos 120 ml</td>
-              <td>Antitusivos</td>
-              <td>Caja de 10</td>
-              <td><strong>10</strong></td>
-              <td><span class="insignia insignia-exito">Activo</span></td>
-              <td>
-                <button class="boton">Editar</button>
-                <button class="boton boton-peligro">Desactivar</button>
-              </td>
-            </tr>
-            <tr>
-              <td><strong>MED-005</strong></td>
-              <td>Paracetamol 500 mg</td>
-              <td>Antitusivos</td>
-              <td>Caja de 12</td>
-              <td><strong>12</strong></td>
-              <td><span class="insignia insignia-exito">Activo</span></td>
-              <td>
-                <button class="boton">Editar</button>
-                <button class="boton boton-peligro">Desactivar</button>
-              </td>
-            </tr>
-            <tr style="opacity: 0.6;">
-              <td><strong>MED-010</strong></td>
-              <td>Aspirina 500mg</td>
-              <td>Analgésicos</td>
-              <td>Blíster</td>
-              <td><strong>1</strong></td>
-              <td><span class="insignia insignia-peligro">Inactivo</span></td>
-              <td>
-                <button class="boton">Editar</button>
-                <button class="boton boton-exito">Activar</button>
-              </td>
-            </tr>
+            <c:forEach var="p" items="${productos}">
+              <tr style="${!p.activo ? 'opacity:0.6;' : ''}">
+                <td><strong>${p.codigo}</strong></td>
+                <td>${p.nombre}</td>
+                <td>${p.nombreCategoria}</td>
+                <td>
+                  <span class="insignia ${p.activo ? 'insignia-exito' : 'insignia-peligro'}">
+                    ${p.activo ? 'Activo' : 'Inactivo'}
+                  </span>
+                </td>
+                <td>
+                  <a href="#modal-editar-producto"
+                     class="boton"
+                     onclick="editarProducto('${p.id}', '${p.codigo}', '${p.nombre}', '${p.idCategoria}', '${p.activo}')">
+                     Editar
+                  </a>
+                  <a href="${pageContext.request.contextPath}/catalogo/toggle/${p.id}"
+                     class="boton ${p.activo ? 'boton-peligro' : 'boton-exito'}">
+                     ${p.activo ? 'Desactivar' : 'Activar'}
+                  </a>
+                </td>
+              </tr>
+            </c:forEach>
           </tbody>
         </table>
       </div>
     </main>
   </div>
 
-  <!-- Modal Crear -->
+  <!-- 🟢 MODAL CREAR -->
   <div id="modal-crear-producto" class="modal">
     <a href="#" class="fondo"></a>
     <div class="tarjeta-modal">
@@ -158,62 +107,46 @@
         <a href="#" class="cerrar">✕</a>
       </div>
 
-      <div class="cuerpo-modal">
-        <form>
+      <form action="${pageContext.request.contextPath}/catalogo/guardar" method="post">
+        <div class="cuerpo-modal">
           <div class="grupo-formulario">
-            <label for="codigo">Código</label>
-            <input id="codigo" type="text" class="control-formulario" placeholder="Ej: MED-001">
+            <label>Código</label>
+            <input type="text" name="codigo" class="control-formulario" required>
           </div>
 
           <div class="grupo-formulario">
-            <label for="nombre">Nombre</label>
-            <input id="nombre" type="text" class="control-formulario" placeholder="Ej: Paracetamol 500mg">
+            <label>Nombre</label>
+            <input type="text" name="nombre" class="control-formulario" required>
           </div>
 
           <div class="grupo-formulario">
-            <label for="categoria">Categoría</label>
-            <select id="categoria" class="control-formulario">
+            <label>Categoría</label>
+            <select name="idCategoria" class="control-formulario" required>
               <option value="">-- Seleccionar --</option>
-              <option value="1">Analgésicos</option>
-              <option value="2">Antiinflamatorios</option>
-              <option value="3">Antibióticos</option>
-              <option value="4">Vitaminas</option>
+              <c:forEach var="cat" items="${categorias}">
+                <option value="${cat.id}">${cat.nombre}</option>
+              </c:forEach>
             </select>
           </div>
 
           <div class="grupo-formulario">
-            <label for="unidad">Presentación</label>
-            <select id="unidad" class="control-formulario">
-              <option value="">-- Seleccionar --</option>
-              <option>Blíster</option>
-              <option>Caja</option>
-              <option>Frasco</option>
-            </select>
-          </div>
-
-          <div class="grupo-formulario">
-            <label for="cantidad">Factor Base</label>
-            <input id="cantidad" type="number" class="control-formulario" placeholder="0" min="0">
-          </div>
-
-          <div class="grupo-formulario">
-            <label>Flag</label>
-            <select id="activo" class="control-formulario">
+            <label>Estado</label>
+            <select name="activo" class="control-formulario">
               <option value="true" selected>Activo</option>
               <option value="false">Inactivo</option>
             </select>
           </div>
-        </form>
-      </div>
+        </div>
 
-      <div class="pie-modal">
-        <a href="#" class="boton">Cancelar</a>
-        <a href="#" class="boton boton-primario">Guardar</a>
-      </div>
+        <div class="pie-modal">
+          <a href="#" class="boton">Cancelar</a>
+          <button type="submit" class="boton boton-primario">Guardar</button>
+        </div>
+      </form>
     </div>
   </div>
 
-  <!-- Modal Editar -->
+  <!-- 🟡 MODAL EDITAR -->
   <div id="modal-editar-producto" class="modal">
     <a href="#" class="fondo"></a>
     <div class="tarjeta-modal">
@@ -222,55 +155,54 @@
         <a href="#" class="cerrar">✕</a>
       </div>
 
-      <div class="cuerpo-modal">
-        <form>
+      <form action="${pageContext.request.contextPath}/catalogo/actualizar" method="post">
+        <input type="hidden" id="edit-id" name="id">
+        <div class="cuerpo-modal">
           <div class="grupo-formulario">
-            <label for="codigo">Código</label>
-            <input id="codigo" type="text" class="control-formulario" placeholder="Ej: MED-001" value="MED-001">
+            <label>Código</label>
+            <input id="edit-codigo" type="text" name="codigo" class="control-formulario" required>
           </div>
 
           <div class="grupo-formulario">
-            <label for="nombre">Nombre</label>
-            <input id="nombre" type="text" class="control-formulario" placeholder="Ej: Paracetamol 500mg" value="Paracetamol 500mg">
+            <label>Nombre</label>
+            <input id="edit-nombre" type="text" name="nombre" class="control-formulario" required>
           </div>
 
           <div class="grupo-formulario">
-            <label for="categoria">Categoría</label>
-            <select id="categoria" class="control-formulario">
-              <option value="">-- Seleccionar --</option>
-              <option value="1" selected>Analgésicos</option>
-              <option value="2">Antiinflamatorios</option>
-              <option value="3">Antibióticos</option>
-              <option value="4">Vitaminas</option>
+            <label>Categoría</label>
+            <select id="edit-categoria" name="idCategoria" class="control-formulario" required>
+              <c:forEach var="cat" items="${categorias}">
+                <option value="${cat.id}">${cat.nombre}</option>
+              </c:forEach>
             </select>
           </div>
 
           <div class="grupo-formulario">
-            <label for="unidad">Presentación</label>
-            <input id="cantidad" type="text" class="control-formulario" min="0" value="Caja" disabled>
-          </div>
-
-          <div class="grupo-formulario">
-            <label for="cantidad">Factor Base</label>
-            <input id="cantidad" type="number" class="control-formulario" value="10" disabled>
-          </div>
-
-          <div class="grupo-formulario">
-            <label>Flag</label>
-            <select id="activo" class="control-formulario">
-              <option value="true" selected>Activo</option>
+            <label>Estado</label>
+            <select id="edit-activo" name="activo" class="control-formulario">
+              <option value="true">Activo</option>
               <option value="false">Inactivo</option>
             </select>
           </div>
-        </form>
-      </div>
+        </div>
 
-      <div class="pie-modal">
-        <a href="#" class="boton">Cancelar</a>
-        <a href="#" class="boton boton-primario">Guardar</a>
-      </div>
+        <div class="pie-modal">
+          <a href="#" class="boton">Cancelar</a>
+          <button type="submit" class="boton boton-primario">Guardar Cambios</button>
+        </div>
+      </form>
     </div>
   </div>
+
+  <script>
+    function editarProducto(id, codigo, nombre, idCategoria, activo) {
+      document.getElementById("edit-id").value = id;
+      document.getElementById("edit-codigo").value = codigo;
+      document.getElementById("edit-nombre").value = nombre;
+      document.getElementById("edit-categoria").value = idCategoria;
+      document.getElementById("edit-activo").value = (activo === true || activo === 'true') ? 'true' : 'false';
+    }
+  </script>
 
 </body>
 </html>

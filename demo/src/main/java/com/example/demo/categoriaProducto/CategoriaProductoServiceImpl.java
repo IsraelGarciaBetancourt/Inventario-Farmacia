@@ -1,34 +1,43 @@
 package com.example.demo.categoriaProducto;
 
-import org.springframework.stereotype.Service;
 import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 @Service
 public class CategoriaProductoServiceImpl implements CategoriaProductoService {
 
-    private final CategoriaProductoDAO categoriaDAO;
-
-    public CategoriaProductoServiceImpl(CategoriaProductoDAO categoriaDAO) {
-        this.categoriaDAO = categoriaDAO;
-    }
+    @Autowired
+    private CategoriaProductoRepository categoriaProductoRepository;
 
     @Override
     public List<CategoriaProducto> listarCategorias() {
-        return categoriaDAO.listarCategorias();
+        return categoriaProductoRepository.listarCategorias();
     }
 
     @Override
-    public void crearCategoria(CategoriaProducto categoria) {
-        categoriaDAO.crearCategoria(categoria);
+    public List<CategoriaProducto> listarCategoriasActivas() {
+        return categoriaProductoRepository.listarCategoriasActivas();
     }
 
     @Override
-    public CategoriaProducto obtenerPorId(Integer id) {
-        return categoriaDAO.obtenerPorId(id);
+    public CategoriaProducto obtenerCategoriaPorId(int id) {
+        return categoriaProductoRepository.obtenerCategoriaPorId(id);
     }
 
     @Override
-    public void actualizarCategoria(CategoriaProducto categoria) {
-        categoriaDAO.actualizarCategoria(categoria);
+    public boolean guardarCategoria(CategoriaProducto categoria) {
+        return categoriaProductoRepository.guardarCategoria(categoria) > 0;
+    }
+
+    @Override
+    public boolean actualizarCategoria(CategoriaProducto categoria) {
+        return categoriaProductoRepository.actualizarCategoria(categoria) > 0;
+    }
+
+    @Override
+    public boolean eliminarCategoria(int id) {
+        return categoriaProductoRepository.eliminarCategoria(id) > 0;
     }
 }

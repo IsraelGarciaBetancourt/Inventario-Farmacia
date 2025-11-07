@@ -13,11 +13,11 @@
     <a href="${pageContext.request.contextPath}/dashboard"
        class="enlace-nav ${fn:contains(currentPath, '/dashboard') ? 'activo' : ''}">📊 Dashboard</a>
 
-    <a href="${pageContext.request.contextPath}/ingresos"
-       class="enlace-nav ${fn:contains(currentPath, '/ingresos') ? 'activo' : ''}">📥 Ingresos</a>
+    <a href="${pageContext.request.contextPath}/documentos/ingresos"
+       class="enlace-nav ${fn:contains(currentPath, '/documentos/ingresos') ? 'activo' : ''}">📥 Ingresos</a>
 
-    <a href="${pageContext.request.contextPath}/salidas"
-       class="enlace-nav ${fn:contains(currentPath, '/salidas') ? 'activo' : ''}">📤 Salidas</a>
+    <a href="${pageContext.request.contextPath}/documentos/salidas"
+       class="enlace-nav ${fn:contains(currentPath, '/documentos/salidas') ? 'activo' : ''}">📤 Salidas</a>
 
     <a href="${pageContext.request.contextPath}/catalogo"
        class="enlace-nav ${fn:contains(currentPath, '/catalogo') ? 'activo' : ''}">📋 Catálogo</a>

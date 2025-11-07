@@ -3,8 +3,18 @@ package com.example.demo.categoriaProducto;
 import java.util.List;
 
 public interface CategoriaProductoDAO {
+
+    // Listados
     List<CategoriaProducto> listarCategorias();
-    void crearCategoria(CategoriaProducto categoria);
-    CategoriaProducto obtenerPorId(Integer id);
-    void actualizarCategoria(CategoriaProducto categoria);
+    List<CategoriaProducto> listarCategoriasActivas();
+
+    // Obtener uno
+    CategoriaProducto obtenerCategoriaPorId(int id);
+
+    // Persistencia
+    int guardarCategoria(CategoriaProducto categoria);
+    int actualizarCategoria(CategoriaProducto categoria);
+
+    // Desactivar (eliminado lógico)
+    int eliminarCategoria(int id);
 }
