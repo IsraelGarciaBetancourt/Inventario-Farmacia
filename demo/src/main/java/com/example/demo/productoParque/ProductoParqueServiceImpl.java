@@ -13,6 +13,11 @@ public class ProductoParqueServiceImpl implements ProductoParqueService {
     }
 
     @Override
+    public List<ProductoParque> listarTodos() {
+        return productoParqueRepository.listarTodos();
+    }
+
+    @Override
     public List<ProductoParque> listarActivos() {
         return productoParqueRepository.listarActivos();
     }
@@ -25,5 +30,20 @@ public class ProductoParqueServiceImpl implements ProductoParqueService {
     @Override
     public void actualizarStockPorMovimiento(int idCatalogo, int cantidad, double precioUnitario, boolean esIngreso) {
         productoParqueRepository.actualizarStockPorMovimiento(idCatalogo, cantidad, precioUnitario, esIngreso);
+    }
+
+    @Override
+    public void cambiarEstado(int id) {
+        productoParqueRepository.cambiarEstado(id);
+    }
+
+    @Override
+    public int contarBajoStock() {
+        return productoParqueRepository.contarBajoStock();
+    }
+
+    @Override
+    public int obtenerTotalUnidades() {
+        return productoParqueRepository.obtenerTotalUnidades();
     }
 }

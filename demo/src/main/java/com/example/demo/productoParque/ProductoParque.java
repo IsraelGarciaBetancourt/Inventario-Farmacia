@@ -6,7 +6,9 @@ public class ProductoParque {
     private int existencias;
     private double valorStock;
     private boolean activo;
-    private String nombreProducto; // ✅ agregado para mostrar en los selects
+    private String nombreProducto;
+    private String codigoProducto;
+    private String categoriaNombre;
 
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
@@ -25,4 +27,10 @@ public class ProductoParque {
 
     public String getNombreProducto() { return nombreProducto; }
     public void setNombreProducto(String nombreProducto) { this.nombreProducto = nombreProducto; }
+
+    public String getCodigoProducto() { return codigoProducto; }
+    public void setCodigoProducto(String codigoProducto) { this.codigoProducto = codigoProducto; }
+
+    public String getCategoriaNombre() { return categoriaNombre; }
+    public void setCategoriaNombre(String categoriaNombre) { this.categoriaNombre = categoriaNombre; }
 }
