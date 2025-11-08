@@ -17,7 +17,7 @@
       <header class="encabezado">
         <h1>Catálogo de Productos</h1>
         <div class="insignia-usuario">
-          <span>Admin</span>
+          <span>${sessionScope.nombreUsuario}</span>
           <div class="avatar"></div>
         </div>
       </header>

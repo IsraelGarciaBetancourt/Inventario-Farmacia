@@ -108,8 +108,31 @@ public class ProductoParqueRepository {
         }, idCatalogo);
     }
 
+    // ✅ Verifica si existe un producto en el parque
+    private boolean existeEnParque(int idCatalogo) {
+        String sql = "SELECT COUNT(*) FROM producto_parque WHERE id_producto_catalogo = ?";
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, idCatalogo);
+        return count != null && count > 0;
+    }
+
+    // ✅ Crea un nuevo registro en producto_parque si no existe
+    private void crearEnParqueSiNoExiste(int idCatalogo) {
+        if (!existeEnParque(idCatalogo)) {
+            String sql = """
+                INSERT INTO producto_parque (id_producto_catalogo, existencias, valor_stock, activo, created_at, updated_at)
+                VALUES (?, 0, 0, TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+            """;
+            jdbcTemplate.update(sql, idCatalogo);
+            System.out.println("✅ Producto " + idCatalogo + " creado automáticamente en producto_parque");
+        }
+    }
+
     // ✅ Actualiza el stock de un producto dependiendo del tipo de movimiento
     public void actualizarStockPorMovimiento(int idCatalogo, int cantidad, double precioUnitario, boolean esIngreso) {
+        // 🔥 PRIMERO: Asegurar que el producto existe en producto_parque
+        crearEnParqueSiNoExiste(idCatalogo);
+
+        // SEGUNDO: Actualizar el stock
         String sql;
         if (esIngreso) {
             sql = """

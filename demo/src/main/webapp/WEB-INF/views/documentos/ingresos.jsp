@@ -18,7 +18,7 @@
     <header class="encabezado">
       <h1>Registro de Ingresos</h1>
       <div class="insignia-usuario">
-        <span>Almacenero</span>
+        <span>${sessionScope.nombreUsuario}</span>
         <div class="avatar"></div>
       </div>
     </header>
