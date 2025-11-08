@@ -212,19 +212,43 @@ document.addEventListener("DOMContentLoaded", () => {
   const tabla = document.querySelector("#tablaProductos tbody");
   const baseURL = window.location.origin;
 
+  // ========== FUNCIÓN PARA CALCULAR TOTAL ==========
+  function calcularTotal() {
+    let total = 0;
+    tabla.querySelectorAll("tr").forEach(tr => {
+      const cantidad = parseFloat(tr.querySelector(".cantidad").value) || 0;
+      const precio = parseFloat(tr.querySelector(".precio").value) || 0;
+      total += cantidad * precio;
+    });
+    document.getElementById("total").textContent = total.toFixed(2);
+    return total;
+  }
+
   // ========== AGREGAR FILA ==========
   document.getElementById("agregarFila").addEventListener("click", () => {
     const clone = tabla.querySelector("tr").cloneNode(true);
-    clone.querySelectorAll("input").forEach(i => i.value = (i.type === "number" ? 0 : ""));
+    clone.querySelectorAll("input").forEach(i => {
+      if (i.type === "number") {
+        i.value = 0;
+      } else {
+        i.value = "";
+      }
+    });
     clone.querySelector(".producto").selectedIndex = 0;
     clone.querySelector(".subtotal strong").textContent = "S/ 0.00";
     tabla.appendChild(clone);
+    calcularTotal(); // Recalcular total al agregar fila
   });
 
-  // ========== ELIMINAR FILA ==========
+  // ========== ELIMINAR FILA (CORREGIDA) ==========
   window.eliminarFila = (btn) => {
     const filas = tabla.querySelectorAll("tr");
-    if (filas.length > 1) btn.closest("tr").remove();
+    if (filas.length > 1) {
+      btn.closest("tr").remove();
+      calcularTotal(); // ⭐ RECALCULAR TOTAL AL ELIMINAR
+    } else {
+      alert("Debe mantener al menos una fila");
+    }
   };
 
   // ========== CALCULAR SUBTOTALES ==========
@@ -236,13 +260,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const subtotal = cantidad * precio;
       fila.querySelector(".subtotal strong").textContent = "S/ " + subtotal.toFixed(2);
 
-      let total = 0;
-      tabla.querySelectorAll("tr").forEach(tr => {
-        const c = parseFloat(tr.querySelector(".cantidad").value) || 0;
-        const p = parseFloat(tr.querySelector(".precio").value) || 0;
-        total += c * p;
-      });
-      document.getElementById("total").textContent = total.toFixed(2);
+      calcularTotal(); // Usar la función centralizada
     }
   });
 
@@ -271,21 +289,28 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
-    if (documento.detalles.length === 0) return alert("Debe ingresar al menos un producto válido.");
+    if (documento.detalles.length === 0) {
+      alert("Debe ingresar al menos un producto válido.");
+      return;
+    }
 
-    const res = await fetch(baseURL + "/documentos/guardarIngreso", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(documento)
-    });
+    try {
+      const res = await fetch(baseURL + "/documentos/guardarIngreso", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(documento)
+      });
 
-
-    const text = await res.text();
-    alert(text);
-    if (res.ok) location.reload();
+      const text = await res.text();
+      alert(text);
+      if (res.ok) location.reload();
+    } catch (error) {
+      console.error("Error al guardar:", error);
+      alert("Error al guardar el documento");
+    }
   });
 
-  // ========== ABRIR MODAL DETALLE (CORREGIDO) ==========
+  // ========== ABRIR MODAL DETALLE ==========
   document.querySelectorAll(".ver-btn").forEach(btn => {
     btn.addEventListener("click", (e) => {
       e.preventDefault();
@@ -298,9 +323,12 @@ document.addEventListener("DOMContentLoaded", () => {
       verDetalle(Number(id));
     });
   });
+
+  // ========== CALCULAR TOTAL INICIAL ==========
+  calcularTotal();
 });
 
-// ========== FUNCIÓN verDetalle (CORREGIDA) ==========
+// ========== FUNCIÓN verDetalle ==========
 async function verDetalle(idDocumento) {
   const id = parseInt(idDocumento, 10);
 
@@ -356,7 +384,7 @@ async function verDetalle(idDocumento) {
     let totalProductos = 0, totalUnidades = 0, totalValor = 0;
 
     console.log("🔄 Limpiando tabla antes de llenar...");
-    tbody.innerHTML = ""; // Limpiar de nuevo por si acaso
+    tbody.innerHTML = "";
 
     detalles.forEach(det => {
       console.log("📦 Procesando detalle:", det);
@@ -370,7 +398,6 @@ async function verDetalle(idDocumento) {
 
       const fila = document.createElement("tr");
 
-      // Crear celdas individualmente
       const tdProducto = document.createElement("td");
       tdProducto.textContent = nombreProducto;
 

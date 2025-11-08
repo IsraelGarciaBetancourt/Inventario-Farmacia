@@ -43,7 +43,6 @@
             <tr>
               <th>ID</th>
               <th>Nombre</th>
-              <th>Total Productos</th>
               <th>Flag</th>
               <th>Acciones</th>
             </tr>
@@ -53,7 +52,6 @@
                 <tr>
                   <td>${categoria.id}</td>
                   <td><strong>${categoria.nombre}</strong></td>
-                  <td>—</td>
                   <td>
                     <span class="insignia ${categoria.activo ? 'insignia-exito' : 'insignia-peligro'}">
                       ${categoria.activo ? 'Activo' : 'Inactivo'}
@@ -68,7 +66,7 @@
                             data-activo="${categoria.activo}">
                       Editar
                     </button>
-                    <button class="boton">Ver Productos</button>
+
                   </td>
                 </tr>
               </c:forEach>
