@@ -28,6 +28,9 @@
     <a href="${pageContext.request.contextPath}/categorias"
        class="enlace-nav ${fn:contains(currentPath, '/categorias') ? 'activo' : ''}">📂 Categorías</a>
 
+    <a href="${pageContext.request.contextPath}/usuarios"
+           class="enlace-nav ${fn:contains(currentPath, '/usuarios') ? 'activo' : ''}">👤 Usuarios</a>
+
     <a href="${pageContext.request.contextPath}/logout"
        class="enlace-nav"
        onclick="return confirm('¿Seguro que deseas cerrar sesión?');">🚪 Cerrar Sesión</a>

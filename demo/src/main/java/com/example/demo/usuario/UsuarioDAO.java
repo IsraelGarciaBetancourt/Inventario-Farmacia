@@ -1,5 +1,5 @@
-package com.example.demo.usuario;
+    package com.example.demo.usuario;
 
-public interface UsuarioDAO {
-    Usuario buscarPorUsername(String username);
-}
+    public interface UsuarioDAO {
+        Usuario buscarPorUsername(String username);
+    }
