@@ -1,18 +1,35 @@
 package com.example.demo.productoCatalogo;
 
+import java.time.LocalDateTime;
+import com.example.demo.categoria.Categoria;
+
 public class ProductoCatalogo {
-    private Integer id;
+
+    private int id;
     private String codigo;
     private String nombre;
-    private Integer idCategoria;
-    private Boolean activo;
+    private Categoria categoria;
+    private boolean activo;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
-    // Auxiliar para mostrar en la vista
-    private String nombreCategoria;
+    public ProductoCatalogo() {}
 
-    // Getters y Setters
-    public Integer getId() { return id; }
-    public void setId(Integer id) { this.id = id; }
+    public ProductoCatalogo(int id, String codigo, String nombre, Categoria categoria,
+                            boolean activo, LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this.id = id;
+        this.codigo = codigo;
+        this.nombre = nombre;
+        this.categoria = categoria;
+        this.activo = activo;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
+
+    // Getters y setters...
+
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
 
     public String getCodigo() { return codigo; }
     public void setCodigo(String codigo) { this.codigo = codigo; }
@@ -20,12 +37,15 @@ public class ProductoCatalogo {
     public String getNombre() { return nombre; }
     public void setNombre(String nombre) { this.nombre = nombre; }
 
-    public Integer getIdCategoria() { return idCategoria; }
-    public void setIdCategoria(Integer idCategoria) { this.idCategoria = idCategoria; }
+    public Categoria getCategoria() { return categoria; }
+    public void setCategoria(Categoria categoria) { this.categoria = categoria; }
 
-    public Boolean getActivo() { return activo; }
-    public void setActivo(Boolean activo) { this.activo = activo; }
+    public boolean isActivo() { return activo; }
+    public void setActivo(boolean activo) { this.activo = activo; }
 
-    public String getNombreCategoria() { return nombreCategoria; }
-    public void setNombreCategoria(String nombreCategoria) { this.nombreCategoria = nombreCategoria; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 }

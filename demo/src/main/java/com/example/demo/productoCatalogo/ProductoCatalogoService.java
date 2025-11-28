@@ -2,15 +2,19 @@ package com.example.demo.productoCatalogo;
 
 import java.util.List;
 
-public interface ProductoCatalogoService {
+    public interface ProductoCatalogoService {
 
-    List<ProductoCatalogo> listarProductosCatalogo();
-    List<ProductoCatalogo> listarProductosCatalogoActivos();
+    List<ProductoCatalogo> listar();
 
-    ProductoCatalogo obtenerProductoCatalogoPorId(int id);
-    boolean guardarProductoCatalogo(ProductoCatalogo producto);
-    boolean actualizarProductoCatalogo(ProductoCatalogo producto);
+    List<ProductoCatalogo> listarActivos();
 
-    boolean toggleProductoCatalogo(int id);
-    boolean desactivarProductoCatalogo(int id);
+    ProductoCatalogo buscarPorId(int id);
+
+    int guardar(ProductoCatalogo p);
+
+    int actualizar(ProductoCatalogo p);
+
+    int desactivar(int id);
+
+    int activar(int id);
 }

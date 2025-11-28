@@ -1,16 +1,20 @@
 package com.example.demo.documento;
 
-import com.example.demo.productoParque.ProductoParque;
 import java.util.List;
 
 public interface DocumentoService {
+
     List<Documento> listarIngresos();
-    List<Documento> listarSalidas(); // ✅ nuevo
-    Documento obtenerPorId(int id);
-    List<DocumentoDetalle> listarDetalles(int idDocumento);
+    List<Documento> listarSalidas();
+
+    Documento buscarPorId(int id);
+
     String generarNumeroIngreso();
     String generarNumeroSalida();
-    int registrarDocumentoConDetalles(Documento doc);
-    int registrarSalidaConDetalles(Documento doc);
-    List<ProductoParque> listarProductosEnParqueActivos();
+
+    String guardarIngreso(Documento documento, List<DocumentoDetalle> detalles);
+
+    String guardarSalida(Documento documento, List<DocumentoDetalle> detalles);
+
+    List<DocumentoDetalle> listarDetalles(int idDocumento);
 }

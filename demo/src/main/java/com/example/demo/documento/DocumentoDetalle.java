@@ -1,38 +1,52 @@
 package com.example.demo.documento;
 
+import java.time.LocalDateTime;
+
+import com.example.demo.productoCatalogo.ProductoCatalogo;
+
 public class DocumentoDetalle {
 
     private int id;
     private int idDocumento;
-    private int idProductoCatalogo;
+    private ProductoCatalogo productoCatalogo;
     private int cantidad;
-    private double precioUnitario;
-    private double subtotal;
     private boolean activo;
-    private String productoNombre;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
-    // Getters y Setters
+    public DocumentoDetalle() {}
+
+    public DocumentoDetalle(int id, int idDocumento, ProductoCatalogo productoCatalogo,
+                            int cantidad, boolean activo, LocalDateTime createdAt,
+                            LocalDateTime updatedAt) {
+        this.id = id;
+        this.idDocumento = idDocumento;
+        this.productoCatalogo = productoCatalogo;
+        this.cantidad = cantidad;
+        this.activo = activo;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
+
+    // Getters / Setters
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 
     public int getIdDocumento() { return idDocumento; }
     public void setIdDocumento(int idDocumento) { this.idDocumento = idDocumento; }
 
-    public int getIdProductoCatalogo() { return idProductoCatalogo; }
-    public void setIdProductoCatalogo(int idProductoCatalogo) { this.idProductoCatalogo = idProductoCatalogo; }
+    public ProductoCatalogo getProductoCatalogo() { return productoCatalogo; }
+    public void setProductoCatalogo(ProductoCatalogo productoCatalogo) { this.productoCatalogo = productoCatalogo; }
 
     public int getCantidad() { return cantidad; }
     public void setCantidad(int cantidad) { this.cantidad = cantidad; }
 
-    public double getPrecioUnitario() { return precioUnitario; }
-    public void setPrecioUnitario(double precioUnitario) { this.precioUnitario = precioUnitario; }
-
-    public double getSubtotal() { return subtotal; }
-    public void setSubtotal(double subtotal) { this.subtotal = subtotal; }
-
     public boolean isActivo() { return activo; }
     public void setActivo(boolean activo) { this.activo = activo; }
 
-    public String getProductoNombre() { return productoNombre; }
-    public void setProductoNombre(String productoNombre) { this.productoNombre = productoNombre; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 }

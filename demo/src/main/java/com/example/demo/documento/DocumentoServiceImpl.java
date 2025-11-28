@@ -1,148 +1,105 @@
 package com.example.demo.documento;
 
-import com.example.demo.productoParque.ProductoParque;
+import java.util.List;
+
 import com.example.demo.productoParque.ProductoParqueService;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.Objects;
 
 @Service
 public class DocumentoServiceImpl implements DocumentoService {
 
-    private final DocumentoRepository repo;
-    private final ProductoParqueService productoParqueService;
+    private final DocumentoDAO documentoDAO;
+    private final DocumentoDetalleDAO detalleDAO;
+    private final ProductoParqueService parqueService;
 
-    public DocumentoServiceImpl(DocumentoRepository repo, ProductoParqueService productoParqueService) {
-        this.repo = repo;
-        this.productoParqueService = productoParqueService;
+    public DocumentoServiceImpl(DocumentoDAO documentoDAO,
+                                DocumentoDetalleDAO detalleDAO,
+                                ProductoParqueService parqueService) {
+        this.documentoDAO = documentoDAO;
+        this.detalleDAO = detalleDAO;
+        this.parqueService = parqueService;
     }
 
     @Override
     public List<Documento> listarIngresos() {
-        return repo.listarIngresos();
+        return documentoDAO.listarIngresos();
     }
 
     @Override
     public List<Documento> listarSalidas() {
-        return repo.listarSalidas();
+        return documentoDAO.listarSalidas();
     }
 
     @Override
-    public Documento obtenerPorId(int id) {
-        return repo.obtenerPorId(id);
+    public Documento buscarPorId(int id) {
+        return documentoDAO.buscarPorId(id);
     }
 
     @Override
     public List<DocumentoDetalle> listarDetalles(int idDocumento) {
-        return repo.listarDetallesPorDocumento(idDocumento);
+        return detalleDAO.listarPorDocumentoId(idDocumento);
     }
 
     @Override
     public String generarNumeroIngreso() {
-        return repo.siguienteNumeroIngreso();
+        String ultimo = documentoDAO.obtenerUltimoNumeroIngreso();
+        return generarCorrelativo(ultimo, "ING-");
     }
 
     @Override
     public String generarNumeroSalida() {
-        return repo.siguienteNumeroSalida();
+        String ultimo = documentoDAO.obtenerUltimoNumeroSalida();
+        return generarCorrelativo(ultimo, "SAL-");
+    }
+
+    private String generarCorrelativo(String ultimo, String prefijo) {
+        if (ultimo == null) {
+            return prefijo + "0001";
+        }
+        int numero = Integer.parseInt(ultimo.substring(4));
+        numero++;
+        return String.format(prefijo + "%04d", numero);
     }
 
     @Override
-    public List<ProductoParque> listarProductosEnParqueActivos() {
-        return productoParqueService.listarActivos();
+    public String guardarIngreso(Documento documento, List<DocumentoDetalle> detalles) {
+
+        documentoDAO.guardarCabecera(documento);
+
+        int idDoc = documentoDAO.obtenerUltimoId(); // ← AHORA SI OBTIENE EL ID REAL
+
+        for (DocumentoDetalle det : detalles) {
+            det.setIdDocumento(idDoc);
+            detalleDAO.guardarDetalle(det);
+
+            parqueService.registrarIngreso(
+                    det.getProductoCatalogo().getId(),
+                    det.getCantidad()
+            );
+        }
+
+        return "OK";
     }
 
-    // ========================= INGRESOS =========================
     @Override
-    @Transactional
-    public int registrarDocumentoConDetalles(Documento doc) {
-        int totalProductos = 0;
-        int totalUnidades = 0;
-        double totalValor = 0.0;
+    public String guardarSalida(Documento documento, List<DocumentoDetalle> detalles) {
 
-        if (doc.getDetalles() != null) {
-            for (DocumentoDetalle det : doc.getDetalles()) {
-                if (det == null) continue;
-                int cantidad = Objects.requireNonNullElse(det.getCantidad(), 0);
-                double precio = Objects.requireNonNullElse(det.getPrecioUnitario(), 0.0);
-                if (cantidad > 0) {
-                    totalProductos++;
-                    totalUnidades += cantidad;
-                    totalValor += cantidad * precio;
-                }
+        // Validar stock antes de guardar
+        for (DocumentoDetalle det : detalles) {
+            if (!parqueService.registrarSalida(det.getProductoCatalogo().getId(), det.getCantidad())) {
+                return "NO_STOCK";
             }
         }
 
-        doc.setTotalProductos(totalProductos);
-        doc.setTotalUnidades(totalUnidades);
-        doc.setTotalValor(totalValor);
+        documentoDAO.guardarCabecera(documento);
 
-        int idDocumento = repo.insertarCabecera(doc);
+        int idDoc = documentoDAO.obtenerUltimoId(); // ← AHORA SI OBTIENE EL ID REAL
 
-        if (doc.getDetalles() != null) {
-            for (DocumentoDetalle det : doc.getDetalles()) {
-                if (det == null) continue;
-                det.setIdDocumento(idDocumento);
-                repo.insertarDetalle(det);
-
-                // ✅ Actualiza existencias (suma para ingreso)
-                productoParqueService.actualizarStockPorMovimiento(
-                        det.getIdProductoCatalogo(),
-                        det.getCantidad(),
-                        det.getPrecioUnitario(),
-                        true
-                );
-            }
+        for (DocumentoDetalle det : detalles) {
+            det.setIdDocumento(idDoc);
+            detalleDAO.guardarDetalle(det);
         }
 
-        return idDocumento;
-    }
-
-    // ========================= SALIDAS =========================
-    @Override
-    @Transactional
-    public int registrarSalidaConDetalles(Documento doc) {
-        int totalProductos = 0;
-        int totalUnidades = 0;
-        double totalValor = 0.0;
-
-        if (doc.getDetalles() != null) {
-            for (DocumentoDetalle det : doc.getDetalles()) {
-                if (det == null) continue;
-                int cantidad = Objects.requireNonNullElse(det.getCantidad(), 0);
-                double precio = Objects.requireNonNullElse(det.getPrecioUnitario(), 0.0);
-                if (cantidad > 0) {
-                    totalProductos++;
-                    totalUnidades += cantidad;
-                    totalValor += cantidad * precio;
-                }
-            }
-        }
-
-        doc.setTotalProductos(totalProductos);
-        doc.setTotalUnidades(totalUnidades);
-        doc.setTotalValor(totalValor);
-
-        int idDocumento = repo.insertarCabecera(doc);
-
-        if (doc.getDetalles() != null) {
-            for (DocumentoDetalle det : doc.getDetalles()) {
-                if (det == null) continue;
-                det.setIdDocumento(idDocumento);
-                repo.insertarDetalle(det);
-
-                // ✅ Actualiza existencias (resta para salida)
-                productoParqueService.actualizarStockPorMovimiento(
-                        det.getIdProductoCatalogo(),
-                        det.getCantidad(),
-                        det.getPrecioUnitario(),
-                        false
-                );
-            }
-        }
-
-        return idDocumento;
+        return "OK";
     }
 }

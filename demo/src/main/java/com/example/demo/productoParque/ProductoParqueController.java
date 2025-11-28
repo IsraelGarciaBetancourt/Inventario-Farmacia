@@ -1,39 +1,34 @@
 package com.example.demo.productoParque;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
-@RequestMapping("/inventario")
 public class ProductoParqueController {
 
-    @Autowired
-    private ProductoParqueService productoParqueService;
+    private final ProductoParqueService service;
 
-    @GetMapping
-    public String listarInventario(Model model) {
-        model.addAttribute("productos", productoParqueService.listarTodos());
-        model.addAttribute("totalUnidades", productoParqueService.obtenerTotalUnidades());
-        model.addAttribute("bajoStock", productoParqueService.contarBajoStock());
-        return "inventario/inventario";
+    public ProductoParqueController(ProductoParqueService service) {
+        this.service = service;
     }
 
-    @PostMapping("/cambiar-estado")
-    public String cambiarEstado(@RequestParam("id") int id, RedirectAttributes redirectAttributes) {
-        try {
-            productoParqueService.cambiarEstado(id);
-            redirectAttributes.addFlashAttribute("mensaje", "Estado actualizado correctamente");
-            redirectAttributes.addFlashAttribute("tipoMensaje", "success");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("mensaje", "Error al actualizar el estado: " + e.getMessage());
-            redirectAttributes.addFlashAttribute("tipoMensaje", "error");
-        }
+    @GetMapping("/inventario")
+    public String listarInventario(Model model) {
+        model.addAttribute("items", service.listar());
+        return "inventario/list"; // JSP que luego armamos
+    }
+
+    @GetMapping("/inventario/desactivar/{id}")
+    public String desactivar(@PathVariable int id) {
+        service.desactivar(id);
         return "redirect:/inventario";
     }
+
+    @GetMapping("/inventario/activar/{id}")
+    public String activar(@PathVariable int id) {
+        service.activar(id);
+        return "redirect:/inventario";
+    }
+
 }

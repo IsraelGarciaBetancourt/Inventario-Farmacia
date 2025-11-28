@@ -1,181 +1,151 @@
 package com.example.demo.productoParque;
 
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Repository;
-
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 
+import com.example.demo.productoCatalogo.ProductoCatalogo;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Repository;
+
 @Repository
-public class ProductoParqueRepository {
+public class ProductoParqueRepository implements ProductoParqueDAO {
 
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplate jdbc;
 
-    public ProductoParqueRepository(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
+    public ProductoParqueRepository(JdbcTemplate jdbc) {
+        this.jdbc = jdbc;
     }
 
-    // ✅ Lista TODOS los productos (activos e inactivos)
-    public List<ProductoParque> listarTodos() {
+    private RowMapper<ProductoParque> mapper = new RowMapper<ProductoParque>() {
+        @Override
+        public ProductoParque mapRow(ResultSet rs, int rowNum) throws SQLException {
+
+            ProductoCatalogo producto = new ProductoCatalogo(
+                    rs.getInt("prod_id"),
+                    rs.getString("codigo"),
+                    rs.getString("prod_nombre"),
+                    null,   // categoría NO se usa aquí
+                    rs.getBoolean("prod_activo"),
+                    null,
+                    null
+            );
+
+            return new ProductoParque(
+                    rs.getInt("parque_id"),
+                    producto,
+                    rs.getInt("existencias"),
+                    rs.getBoolean("parque_activo")
+            );
+        }
+    };
+
+    @Override
+    public List<ProductoParque> listar() {
         String sql = """
             SELECT 
-                pp.id,
-                pp.id_producto_catalogo,
+                pp.id AS parque_id,
                 pp.existencias,
-                pp.valor_stock,
-                pp.activo,
-                pc.nombre AS nombre_producto,
-                pc.codigo AS codigo_producto,
-                c.nombre AS categoria_nombre
+                pp.activo AS parque_activo,
+                pc.id AS prod_id,
+                pc.codigo,
+                pc.nombre AS prod_nombre,
+                pc.activo AS prod_activo
             FROM producto_parque pp
-            INNER JOIN producto_catalogo pc ON pc.id = pp.id_producto_catalogo
-            LEFT JOIN categorias c ON c.id = pc.id_categoria
+            JOIN producto_catalogo pc ON pc.id = pp.id_producto_catalogo
             ORDER BY pc.nombre ASC
         """;
-        return jdbcTemplate.query(sql, (rs, i) -> {
-            ProductoParque p = new ProductoParque();
-            p.setId(rs.getInt("id"));
-            p.setIdProductoCatalogo(rs.getInt("id_producto_catalogo"));
-            p.setExistencias(rs.getInt("existencias"));
-            p.setValorStock(rs.getDouble("valor_stock"));
-            p.setActivo(rs.getBoolean("activo"));
-            p.setNombreProducto(rs.getString("nombre_producto"));
-            p.setCodigoProducto(rs.getString("codigo_producto"));
-            p.setCategoriaNombre(rs.getString("categoria_nombre"));
-            return p;
-        });
+
+        return jdbc.query(sql, mapper);
     }
 
-    // ✅ Lista de productos activos (para salidas)
-    public List<ProductoParque> listarActivos() {
+    @Override
+    public List<ProductoParque> listarActivosConStock() {
         String sql = """
             SELECT 
-                pp.id,
-                pp.id_producto_catalogo,
+                pp.id AS parque_id,
                 pp.existencias,
-                pp.valor_stock,
-                pp.activo,
-                pc.nombre AS nombre_producto,
-                pc.codigo AS codigo_producto,
-                c.nombre AS categoria_nombre
+                pp.activo AS parque_activo,
+                pc.id AS prod_id,
+                pc.codigo,
+                pc.nombre AS prod_nombre,
+                pc.activo AS prod_activo
             FROM producto_parque pp
-            INNER JOIN producto_catalogo pc ON pc.id = pp.id_producto_catalogo
-            LEFT JOIN categorias c ON c.id = pc.id_categoria
-            WHERE pp.activo = TRUE AND pc.activo = TRUE
+            JOIN producto_catalogo pc ON pc.id = pp.id_producto_catalogo
+            WHERE pp.activo = TRUE AND pp.existencias > 0
             ORDER BY pc.nombre ASC
         """;
-        return jdbcTemplate.query(sql, (rs, i) -> {
-            ProductoParque p = new ProductoParque();
-            p.setId(rs.getInt("id"));
-            p.setIdProductoCatalogo(rs.getInt("id_producto_catalogo"));
-            p.setExistencias(rs.getInt("existencias"));
-            p.setValorStock(rs.getDouble("valor_stock"));
-            p.setActivo(rs.getBoolean("activo"));
-            p.setNombreProducto(rs.getString("nombre_producto"));
-            p.setCodigoProducto(rs.getString("codigo_producto"));
-            p.setCategoriaNombre(rs.getString("categoria_nombre"));
-            return p;
-        });
+
+        return jdbc.query(sql, mapper);
     }
 
-    // ✅ Obtener un producto del parque por su id_catalogo
-    public ProductoParque obtenerPorIdCatalogo(int idCatalogo) {
+    @Override
+    public ProductoParque buscarPorProductoCatalogoId(int idProductoCatalogo) {
         String sql = """
             SELECT 
-                pp.id,
-                pp.id_producto_catalogo,
+                pp.id AS parque_id,
                 pp.existencias,
-                pp.valor_stock,
-                pp.activo,
-                pc.nombre AS nombre_producto,
-                pc.codigo AS codigo_producto,
-                c.nombre AS categoria_nombre
+                pp.activo AS parque_activo,
+                pc.id AS prod_id,
+                pc.codigo,
+                pc.nombre AS prod_nombre,
+                pc.activo AS prod_activo
             FROM producto_parque pp
-            INNER JOIN producto_catalogo pc ON pc.id = pp.id_producto_catalogo
-            LEFT JOIN categorias c ON c.id = pc.id_categoria
+            JOIN producto_catalogo pc ON pc.id = pp.id_producto_catalogo
             WHERE pp.id_producto_catalogo = ?
         """;
-        return jdbcTemplate.queryForObject(sql, (rs, i) -> {
-            ProductoParque p = new ProductoParque();
-            p.setId(rs.getInt("id"));
-            p.setIdProductoCatalogo(rs.getInt("id_producto_catalogo"));
-            p.setExistencias(rs.getInt("existencias"));
-            p.setValorStock(rs.getDouble("valor_stock"));
-            p.setActivo(rs.getBoolean("activo"));
-            p.setNombreProducto(rs.getString("nombre_producto"));
-            p.setCodigoProducto(rs.getString("codigo_producto"));
-            p.setCategoriaNombre(rs.getString("categoria_nombre"));
-            return p;
-        }, idCatalogo);
+
+        return jdbc.queryForObject(sql, mapper, idProductoCatalogo);
     }
 
-    // ✅ Verifica si existe un producto en el parque
-    private boolean existeEnParque(int idCatalogo) {
-        String sql = "SELECT COUNT(*) FROM producto_parque WHERE id_producto_catalogo = ?";
-        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, idCatalogo);
-        return count != null && count > 0;
+    @Override
+    public int guardar(ProductoParque p) {
+        String sql = """
+            INSERT INTO producto_parque
+            (id_producto_catalogo, existencias, activo, created_at, updated_at)
+            VALUES (?, ?, TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        """;
+
+        return jdbc.update(sql,
+                p.getProductoCatalogo().getId(),
+                p.getExistencias()
+        );
     }
 
-    // ✅ Crea un nuevo registro en producto_parque si no existe
-    private void crearEnParqueSiNoExiste(int idCatalogo) {
-        if (!existeEnParque(idCatalogo)) {
-            String sql = """
-                INSERT INTO producto_parque (id_producto_catalogo, existencias, valor_stock, activo, created_at, updated_at)
-                VALUES (?, 0, 0, TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-            """;
-            jdbcTemplate.update(sql, idCatalogo);
-            System.out.println("✅ Producto " + idCatalogo + " creado automáticamente en producto_parque");
-        }
-    }
-
-    // ✅ Actualiza el stock de un producto dependiendo del tipo de movimiento
-    public void actualizarStockPorMovimiento(int idCatalogo, int cantidad, double precioUnitario, boolean esIngreso) {
-        // 🔥 PRIMERO: Asegurar que el producto existe en producto_parque
-        crearEnParqueSiNoExiste(idCatalogo);
-
-        // SEGUNDO: Actualizar el stock
-        String sql;
-        if (esIngreso) {
-            sql = """
-                UPDATE producto_parque
-                SET existencias = existencias + ?,
-                    valor_stock = valor_stock + (? * ?),
-                    updated_at = CURRENT_TIMESTAMP
-                WHERE id_producto_catalogo = ? AND activo = TRUE
-            """;
-        } else {
-            sql = """
-                UPDATE producto_parque
-                SET existencias = existencias - ?,
-                    valor_stock = valor_stock - (? * ?),
-                    updated_at = CURRENT_TIMESTAMP
-                WHERE id_producto_catalogo = ? AND activo = TRUE
-            """;
-        }
-        jdbcTemplate.update(sql, cantidad, cantidad, precioUnitario, idCatalogo);
-    }
-
-    // ✅ Cambiar estado activo/inactivo de un producto en el parque
-    public int cambiarEstado(int id) {
+    @Override
+    public int actualizar(ProductoParque p) {
         String sql = """
             UPDATE producto_parque
-            SET activo = NOT activo,
-                updated_at = CURRENT_TIMESTAMP
-            WHERE id = ?
+            SET existencias = ?, activo = ?, updated_at = CURRENT_TIMESTAMP
+            WHERE id_producto_catalogo = ?
         """;
-        return jdbcTemplate.update(sql, id);
+
+        return jdbc.update(sql,
+                p.getExistencias(),
+                p.isActivo(),
+                p.getProductoCatalogo().getId()
+        );
     }
 
-    // ✅ Contar productos con bajo stock (menos de 50 unidades)
-    public int contarBajoStock() {
-        String sql = "SELECT COUNT(*) FROM producto_parque WHERE existencias < 50 AND activo = TRUE";
-        Integer count = jdbcTemplate.queryForObject(sql, Integer.class);
-        return count != null ? count : 0;
+    @Override
+    public int desactivar(int idProductoCatalogo) {
+        String sql = """
+        UPDATE producto_parque
+        SET activo = FALSE, updated_at = CURRENT_TIMESTAMP
+        WHERE id_producto_catalogo = ?
+    """;
+        return jdbc.update(sql, idProductoCatalogo);
     }
 
-    // ✅ Obtener total de unidades en inventario
-    public int obtenerTotalUnidades() {
-        String sql = "SELECT COALESCE(SUM(existencias), 0) FROM producto_parque WHERE activo = TRUE";
-        Integer total = jdbcTemplate.queryForObject(sql, Integer.class);
-        return total != null ? total : 0;
+    @Override
+    public int activar(int idProductoCatalogo) {
+        String sql = """
+        UPDATE producto_parque
+        SET activo = TRUE, updated_at = CURRENT_TIMESTAMP
+        WHERE id_producto_catalogo = ?
+    """;
+        return jdbc.update(sql, idProductoCatalogo);
     }
+
 }

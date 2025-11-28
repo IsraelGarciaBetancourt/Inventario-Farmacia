@@ -4,110 +4,135 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
+import com.example.demo.categoria.Categoria;
+
 @Repository
 public class ProductoCatalogoRepository implements ProductoCatalogoDAO {
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
+    private final JdbcTemplate jdbc;
 
-    private final RowMapper<ProductoCatalogo> mapRowToProducto = new RowMapper<ProductoCatalogo>() {
+    public ProductoCatalogoRepository(JdbcTemplate jdbc) {
+        this.jdbc = jdbc;
+    }
+
+    private RowMapper<ProductoCatalogo> mapper = new RowMapper<ProductoCatalogo>() {
         @Override
         public ProductoCatalogo mapRow(ResultSet rs, int rowNum) throws SQLException {
-            ProductoCatalogo p = new ProductoCatalogo();
-            p.setId(rs.getInt("id"));
-            p.setCodigo(rs.getString("codigo"));
-            p.setNombre(rs.getString("nombre"));
-            p.setIdCategoria(rs.getInt("id_categoria"));
-            p.setActivo(rs.getBoolean("activo"));
-            try {
-                // Columna auxiliar del JOIN
-                String nomCat = rs.getString("nombre_categoria");
-                p.setNombreCategoria(nomCat);
-            } catch (SQLException ignore) {
-                // Si no viene del SELECT, no rompe
-            }
-            return p;
+
+            Categoria categoria = new Categoria(
+                    rs.getInt("id_categoria"),
+                    rs.getString("categoria_nombre"),
+                    rs.getBoolean("categoria_activo"),
+                    rs.getTimestamp("categoria_created").toLocalDateTime(),
+                    rs.getTimestamp("categoria_updated").toLocalDateTime()
+            );
+
+            return new ProductoCatalogo(
+                    rs.getInt("id"),
+                    rs.getString("codigo"),
+                    rs.getString("nombre"),
+                    categoria,
+                    rs.getBoolean("activo"),
+                    rs.getTimestamp("created_at").toLocalDateTime(),
+                    rs.getTimestamp("updated_at").toLocalDateTime()
+            );
         }
     };
 
     @Override
-    public List<ProductoCatalogo> listarProductosCatalogo() {
+    public List<ProductoCatalogo> listar() {
         String sql = """
-            SELECT p.id, p.codigo, p.nombre, p.id_categoria, p.activo,
-                   c.nombre AS nombre_categoria
-            FROM producto_catalogo p
-            INNER JOIN categorias c ON p.id_categoria = c.id
-            ORDER BY p.id DESC
+            SELECT pc.*, 
+                   c.nombre AS categoria_nombre,
+                   c.activo AS categoria_activo,
+                   c.created_at AS categoria_created,
+                   c.updated_at AS categoria_updated
+            FROM producto_catalogo pc
+            JOIN categorias c ON c.id = pc.id_categoria
+            ORDER BY pc.activo DESC, pc.id DESC;
         """;
-        return jdbcTemplate.query(sql, mapRowToProducto);
+
+        return jdbc.query(sql, mapper);
     }
 
     @Override
-    public List<ProductoCatalogo> listarProductosCatalogoActivos() {
+    public List<ProductoCatalogo> listarActivos() {
         String sql = """
-            SELECT p.id, p.codigo, p.nombre, p.id_categoria, p.activo,
-                   c.nombre AS nombre_categoria
-            FROM producto_catalogo p
-            INNER JOIN categorias c ON p.id_categoria = c.id
-            WHERE p.activo = TRUE
-            ORDER BY p.nombre
-        """;
-        return jdbcTemplate.query(sql, mapRowToProducto);
+        SELECT pc.*,
+               c.id AS id_categoria,
+               c.nombre AS categoria_nombre,
+               c.activo AS categoria_activo,
+               c.created_at AS categoria_created,
+               c.updated_at AS categoria_updated
+        FROM producto_catalogo pc
+        JOIN categorias c ON pc.id_categoria = c.id
+        WHERE pc.activo = TRUE
+        ORDER BY pc.nombre ASC
+    """;
+
+        return jdbc.query(sql, mapper);
     }
 
     @Override
-    public ProductoCatalogo obtenerProductoCatalogoPorId(int id) {
+    public ProductoCatalogo buscarPorId(int id) {
         String sql = """
-            SELECT p.id, p.codigo, p.nombre, p.id_categoria, p.activo,
-                   c.nombre AS nombre_categoria
-            FROM producto_catalogo p
-            INNER JOIN categorias c ON p.id_categoria = c.id
-            WHERE p.id = ?
+            SELECT pc.*, 
+                   c.nombre AS categoria_nombre,
+                   c.activo AS categoria_activo,
+                   c.created_at AS categoria_created,
+                   c.updated_at AS categoria_updated
+            FROM producto_catalogo pc
+            JOIN categorias c ON c.id = pc.id_categoria
+            WHERE pc.id = ?;
         """;
-        try {
-            return jdbcTemplate.queryForObject(sql, mapRowToProducto, id);
-        } catch (EmptyResultDataAccessException e) {
-            return null;
-        }
+
+        return jdbc.queryForObject(sql, mapper, id);
     }
 
     @Override
-    public int guardarProductoCatalogo(ProductoCatalogo producto) {
-        String sql = "INSERT INTO producto_catalogo (codigo, nombre, id_categoria, activo) VALUES (?, ?, ?, ?)";
-        return jdbcTemplate.update(sql,
-                producto.getCodigo(),
-                producto.getNombre(),
-                producto.getIdCategoria(),
-                producto.getActivo()); // <- ahora respeta el select del formulario
+    public int guardar(ProductoCatalogo p) {
+        String sql = """
+            INSERT INTO producto_catalogo 
+            (codigo, nombre, id_categoria, activo, created_at, updated_at)
+            VALUES (?, ?, ?, TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+        """;
+
+        return jdbc.update(sql, p.getCodigo(), p.getNombre(), p.getCategoria().getId());
     }
 
     @Override
-    public int actualizarProductoCatalogo(ProductoCatalogo producto) {
-        String sql = "UPDATE producto_catalogo SET codigo = ?, nombre = ?, id_categoria = ?, activo = ? WHERE id = ?";
-        return jdbcTemplate.update(sql,
-                producto.getCodigo(),
-                producto.getNombre(),
-                producto.getIdCategoria(),
-                producto.getActivo(),
-                producto.getId());
+    public int actualizar(ProductoCatalogo p) {
+        String sql = """
+            UPDATE producto_catalogo
+            SET codigo = ?, nombre = ?, id_categoria = ?, activo = ?, 
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = ?;
+        """;
+
+        return jdbc.update(sql,
+                p.getCodigo(), p.getNombre(),
+                p.getCategoria().getId(), p.isActivo(),
+                p.getId()
+        );
     }
 
     @Override
-    public int toggleProductoCatalogo(int id) {
-        // MySQL: NOT invierte el boolean (tinyint 0/1)
-        String sql = "UPDATE producto_catalogo SET activo = NOT activo WHERE id = ?";
-        return jdbcTemplate.update(sql, id);
+    public int desactivar(int id) {
+        return jdbc.update(
+                "UPDATE producto_catalogo SET activo = FALSE, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+                id
+        );
     }
 
     @Override
-    public int desactivarProductoCatalogo(int id) {
-        String sql = "UPDATE producto_catalogo SET activo = FALSE WHERE id = ?";
-        return jdbcTemplate.update(sql, id);
+    public int activar(int id) {
+        return jdbc.update(
+                "UPDATE producto_catalogo SET activo = TRUE, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+                id
+        );
     }
 }

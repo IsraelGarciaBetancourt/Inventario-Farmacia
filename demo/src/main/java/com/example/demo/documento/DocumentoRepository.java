@@ -1,177 +1,158 @@
 package com.example.demo.documento;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.time.LocalDate;
+import java.util.List;
+
+import com.example.demo.usuario.Usuario;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
-import java.util.*;
-import java.util.stream.Collectors;
-
 @Repository
-public class DocumentoRepository {
+public class DocumentoRepository implements DocumentoDAO {
 
     private final JdbcTemplate jdbc;
-    private final SimpleJdbcInsert insertDocumento;
 
     public DocumentoRepository(JdbcTemplate jdbc) {
         this.jdbc = jdbc;
-        this.insertDocumento = new SimpleJdbcInsert(jdbc)
-                .withTableName("documentos")
-                .usingGeneratedKeyColumns("id");
     }
 
-    /** 🔹 Inserta la cabecera del documento y devuelve el ID generado */
-    public int insertarCabecera(Documento d) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("tipo_movimiento", d.getTipoMovimiento());
-        params.put("numero_documento", d.getNumeroDocumento());
-        params.put("fecha", new java.sql.Date(d.getFecha().getTime()));
-        params.put("id_usuario", d.getIdUsuario());
-        params.put("observacion", d.getObservacion());
-        params.put("total_productos", d.getTotalProductos());
-        params.put("total_unidades", d.getTotalUnidades());
-        params.put("total_valor", d.getTotalValor());
-        params.put("activo", true);
+    private RowMapper<Documento> mapperListado = new RowMapper<Documento>() {
+        @Override
+        public Documento mapRow(ResultSet rs, int rowNum) throws SQLException {
 
-        Number key = insertDocumento.executeAndReturnKey(params);
-        return key.intValue();
-    }
+            Usuario u = new Usuario();
+            u.setId(rs.getInt("id_usuario"));
+            u.setNombreCompleto(rs.getString("usuario_nombre"));
 
-    /** 🔹 Inserta un detalle del documento */
-    public int insertarDetalle(DocumentoDetalle det) {
+            Documento d = new Documento();
+            d.setId(rs.getInt("id"));
+            d.setTipoMovimiento(rs.getString("tipo_movimiento"));
+            d.setNumeroDocumento(rs.getString("numero_documento"));
+            d.setFecha(rs.getDate("fecha").toLocalDate());
+            d.setUsuario(u);
+            d.setObservacion(rs.getString("observacion"));
+            d.setActivo(rs.getBoolean("activo"));
+            d.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
+            d.setUpdatedAt(rs.getTimestamp("updated_at").toLocalDateTime());
+            d.setTotalCantidad(rs.getInt("total_cantidad"));
+
+            return d;
+        }
+    };
+
+    @Override
+    public int guardarCabecera(Documento d) {
         String sql = """
-            INSERT INTO documento_detalles
-              (id_documento, id_producto_catalogo, cantidad, precio_unitario, subtotal, activo)
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO documentos
+            (tipo_movimiento, numero_documento, fecha, id_usuario, observacion,
+             activo, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
         """;
-        double subtotal = det.getCantidad() * det.getPrecioUnitario();
+
         return jdbc.update(sql,
-                det.getIdDocumento(),
-                det.getIdProductoCatalogo(),
-                det.getCantidad(),
-                det.getPrecioUnitario(),
-                subtotal,
-                true
+                d.getTipoMovimiento(),
+                d.getNumeroDocumento(),
+                d.getFecha(),
+                d.getUsuario().getId(),
+                d.getObservacion()
         );
     }
 
-    /** 🔹 Lista todos los ingresos */
-    public List<Documento> listarIngresos() {
+    @Override
+    public int obtenerUltimoId() {
+        String sql = "SELECT MAX(id) FROM documentos";
+        return jdbc.queryForObject(sql, Integer.class);
+    }
+
+    @Override
+    public String obtenerUltimoNumeroIngreso() {
         String sql = """
-            SELECT id, tipo_movimiento, numero_documento, fecha, id_usuario,
-                   observacion, total_productos, total_unidades, total_valor, activo
+            SELECT numero_documento
             FROM documentos
             WHERE tipo_movimiento = 'INGRESO'
-            ORDER BY id DESC
+            ORDER BY id DESC LIMIT 1
         """;
-        return jdbc.query(sql, new DocumentoRowMapper());
+
+        try { return jdbc.queryForObject(sql, String.class); }
+        catch (Exception e) { return null; }
     }
 
-    /** 🔹 Lista todas las salidas */
+    @Override
+    public String obtenerUltimoNumeroSalida() {
+        String sql = """
+            SELECT numero_documento
+            FROM documentos
+            WHERE tipo_movimiento = 'SALIDA'
+            ORDER BY id DESC LIMIT 1
+        """;
+
+        try { return jdbc.queryForObject(sql, String.class); }
+        catch (Exception e) { return null; }
+    }
+
+    @Override
+    public List<Documento> listarIngresos() {
+        String sql = """
+            SELECT d.*,
+                   u.nombre_completo AS usuario_nombre,
+                   SUM(dd.cantidad) AS total_cantidad
+            FROM documentos d
+            JOIN usuarios u ON u.id = d.id_usuario
+            JOIN documento_detalles dd ON dd.id_documento = d.id
+            WHERE d.tipo_movimiento = 'INGRESO'
+            GROUP BY d.id, u.nombre_completo
+            ORDER BY d.id DESC
+        """;
+
+        return jdbc.query(sql, mapperListado);
+    }
+
+    @Override
     public List<Documento> listarSalidas() {
         String sql = """
-        SELECT d.*, u.nombre_completo AS usuario_nombre
-        FROM documentos d
-        JOIN usuarios u ON d.id_usuario = u.id
-        WHERE d.tipo_movimiento = 'SALIDA' AND d.activo = TRUE
-        ORDER BY d.fecha DESC, d.id DESC
-    """;
-        return jdbc.query(sql, new DocumentoRowMapperConUsuario());
+            SELECT d.*,
+                   u.nombre_completo AS usuario_nombre,
+                   SUM(dd.cantidad) AS total_cantidad
+            FROM documentos d
+            JOIN usuarios u ON u.id = d.id_usuario
+            JOIN documento_detalles dd ON dd.id_documento = d.id
+            WHERE d.tipo_movimiento = 'SALIDA'
+            GROUP BY d.id, u.nombre_completo
+            ORDER BY d.id DESC
+        """;
+
+        return jdbc.query(sql, mapperListado);
     }
 
-    /** 🔹 Obtiene un documento por su ID (para el modal de detalle) */
-    public Documento obtenerPorId(int id) {
+    @Override
+    public Documento buscarPorId(int id) {
         String sql = """
-            SELECT d.*, u.nombre_completo AS usuario_nombre
+            SELECT d.*,
+                   u.nombre_completo AS usuario_nombre
             FROM documentos d
-            JOIN usuarios u ON d.id_usuario = u.id
+            JOIN usuarios u ON u.id = d.id_usuario
             WHERE d.id = ?
         """;
-        return jdbc.queryForObject(sql, new DocumentoRowMapperConUsuario(), id);
-    }
 
-    /** 🔹 Lista los detalles de un documento con el nombre del producto */
-    public List<DocumentoDetalle> listarDetallesPorDocumento(int idDocumento) {
-        System.out.println("📥 [DEBUG] Entrando a listarDetallesPorDocumento con idDocumento = " + idDocumento);
+        return jdbc.queryForObject(sql, (rs, row) -> {
 
-        String sql = """
-        SELECT d.id,
-               d.id_documento,
-               d.id_producto_catalogo,
-               d.cantidad,
-               d.precio_unitario,
-               (d.cantidad * d.precio_unitario) AS subtotal,
-               d.activo,
-               p.nombre AS producto_nombre
-        FROM documento_detalles d
-        JOIN producto_catalogo p ON p.id = d.id_producto_catalogo
-        WHERE d.id_documento = ? AND d.activo = TRUE
-        ORDER BY d.id ASC
-        """;
+            Usuario u = new Usuario();
+            u.setId(rs.getInt("id_usuario"));
+            u.setNombreCompleto(rs.getString("usuario_nombre"));
 
-        try {
-            List<DocumentoDetalle> detalles = jdbc.query(sql, new DocumentoDetalleRowMapper(), idDocumento);
-            System.out.println("✅ [DEBUG] Detalles obtenidos: " + detalles.size());
-            for (DocumentoDetalle det : detalles) {
-                System.out.printf("   → ID:%d  Prod:%s  Cant:%d  Precio:%.2f  Sub:%.2f%n",
-                        det.getId(), det.getProductoNombre(), det.getCantidad(),
-                        det.getPrecioUnitario(), det.getSubtotal());
-            }
-            return detalles;
-        } catch (Exception e) {
-            System.err.println("❌ [ERROR] listarDetallesPorDocumento falló: " + e.getMessage());
-            e.printStackTrace();
-            throw e;
-        }
-    }
+            Documento d = new Documento();
+            d.setId(rs.getInt("id"));
+            d.setTipoMovimiento(rs.getString("tipo_movimiento"));
+            d.setNumeroDocumento(rs.getString("numero_documento"));
+            d.setFecha(rs.getDate("fecha").toLocalDate());
+            d.setUsuario(u);
+            d.setObservacion(rs.getString("observacion"));
+            d.setActivo(rs.getBoolean("activo"));
+            return d;
 
-    /** 🔹 Genera el próximo número correlativo tipo "ING-001" (compatible con H2 y MySQL) */
-    public String siguienteNumeroIngreso() {
-        String sql = """
-            SELECT COALESCE(MAX(CAST(SUBSTRING(numero_documento, 5) AS INT)), 0)
-            FROM documentos
-            WHERE tipo_movimiento = 'INGRESO' AND numero_documento LIKE 'ING-%'
-        """;
-        Integer max = jdbc.queryForObject(sql, Integer.class);
-        int next = (max == null ? 0 : max) + 1;
-        return String.format("ING-%03d", next);
-    }
-
-    /** 🔹 Genera el próximo número correlativo tipo "SAL-001" (compatible con H2 y MySQL) */
-    public String siguienteNumeroSalida() {
-        String sql = """
-        SELECT COALESCE(MAX(CAST(SUBSTRING(numero_documento, 5) AS INT)), 0)
-        FROM documentos
-        WHERE tipo_movimiento = 'SALIDA' AND numero_documento LIKE 'SAL-%'
-    """;
-        Integer max = jdbc.queryForObject(sql, Integer.class);
-        int next = (max == null ? 0 : max) + 1;
-        return String.format("SAL-%03d", next);
-    }
-
-    /** 🔹 Actualiza el stock en producto_parque tras ingreso o salida */
-    public void actualizarStockYValor(int idProductoCatalogo, int cantidad, double precioUnitario, boolean esIngreso) {
-        String operacion = esIngreso ? "+" : "-";
-        String sql = String.format("""
-            UPDATE producto_parque
-            SET existencias = existencias %s ?,
-                valor_stock = valor_stock %s (? * ?)
-            WHERE id_producto_catalogo = ?
-        """, operacion, operacion);
-
-        jdbc.update(sql, cantidad, cantidad, precioUnitario, idProductoCatalogo);
-    }
-
-    /** 🔹 Devuelve la lista de productos con sus existencias actuales */
-    public List<Map<String, Object>> listarProductosEnParque() {
-        String sql = """
-            SELECT p.id_producto_catalogo, pc.nombre AS producto_nombre,
-                   p.existencias, p.valor_stock
-            FROM producto_parque p
-            JOIN producto_catalogo pc ON p.id_producto_catalogo = pc.id
-            WHERE p.activo = TRUE
-            ORDER BY pc.nombre
-        """;
-        return jdbc.queryForList(sql);
+        }, id);
     }
 }

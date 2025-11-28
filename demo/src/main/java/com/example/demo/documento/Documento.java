@@ -1,30 +1,44 @@
 package com.example.demo.documento;
 
-import org.springframework.format.annotation.DateTimeFormat;
-import java.util.Date;
-import java.util.List;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+import com.example.demo.usuario.Usuario;
 
 public class Documento {
 
     private int id;
-    private String tipoMovimiento;
+    private String tipoMovimiento;   // INGRESO / SALIDA
     private String numeroDocumento;
-
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-    private Date fecha;
-
-    private int idUsuario;
-    private String usuarioNombre;
+    private LocalDate fecha;
+    private Usuario usuario;
     private String observacion;
-
-    private int totalProductos;
-    private int totalUnidades;
-    private double totalValor;
     private boolean activo;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
-    private List<DocumentoDetalle> detalles;
+    // EXTRA para la vista de listar (SUM(dd.cantidad))
+    private int totalCantidad;
 
-    // Getters y Setters
+    public Documento() {}
+
+    public Documento(int id, String tipoMovimiento, String numeroDocumento,
+                     LocalDate fecha, Usuario usuario, String observacion,
+                     boolean activo, LocalDateTime createdAt, LocalDateTime updatedAt,
+                     int totalCantidad) {
+        this.id = id;
+        this.tipoMovimiento = tipoMovimiento;
+        this.numeroDocumento = numeroDocumento;
+        this.fecha = fecha;
+        this.usuario = usuario;
+        this.observacion = observacion;
+        this.activo = activo;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+        this.totalCantidad = totalCantidad;
+    }
+
+    // Getters y setters...
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 
@@ -34,30 +48,24 @@ public class Documento {
     public String getNumeroDocumento() { return numeroDocumento; }
     public void setNumeroDocumento(String numeroDocumento) { this.numeroDocumento = numeroDocumento; }
 
-    public Date getFecha() { return fecha; }
-    public void setFecha(Date fecha) { this.fecha = fecha; }
+    public LocalDate getFecha() { return fecha; }
+    public void setFecha(LocalDate fecha) { this.fecha = fecha; }
 
-    public int getIdUsuario() { return idUsuario; }
-    public void setIdUsuario(int idUsuario) { this.idUsuario = idUsuario; }
-
-    public String getUsuarioNombre() { return usuarioNombre; }
-    public void setUsuarioNombre(String usuarioNombre) { this.usuarioNombre = usuarioNombre; }
+    public Usuario getUsuario() { return usuario; }
+    public void setUsuario(Usuario usuario) { this.usuario = usuario; }
 
     public String getObservacion() { return observacion; }
     public void setObservacion(String observacion) { this.observacion = observacion; }
 
-    public int getTotalProductos() { return totalProductos; }
-    public void setTotalProductos(int totalProductos) { this.totalProductos = totalProductos; }
-
-    public int getTotalUnidades() { return totalUnidades; }
-    public void setTotalUnidades(int totalUnidades) { this.totalUnidades = totalUnidades; }
-
-    public double getTotalValor() { return totalValor; }
-    public void setTotalValor(double totalValor) { this.totalValor = totalValor; }
-
     public boolean isActivo() { return activo; }
     public void setActivo(boolean activo) { this.activo = activo; }
 
-    public List<DocumentoDetalle> getDetalles() { return detalles; }
-    public void setDetalles(List<DocumentoDetalle> detalles) { this.detalles = detalles; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+
+    public int getTotalCantidad() { return totalCantidad; }
+    public void setTotalCantidad(int totalCantidad) { this.totalCantidad = totalCantidad; }
 }

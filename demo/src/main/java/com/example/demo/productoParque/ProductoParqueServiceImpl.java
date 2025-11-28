@@ -1,49 +1,79 @@
 package com.example.demo.productoParque;
 
-import org.springframework.stereotype.Service;
 import java.util.List;
+
+import com.example.demo.productoCatalogo.ProductoCatalogo;
+import com.example.demo.productoCatalogo.ProductoCatalogoService;
+import org.springframework.stereotype.Service;
 
 @Service
 public class ProductoParqueServiceImpl implements ProductoParqueService {
 
-    private final ProductoParqueRepository productoParqueRepository;
+    private final ProductoParqueDAO dao;
+    private final ProductoCatalogoService productoCatalogoService;
 
-    public ProductoParqueServiceImpl(ProductoParqueRepository productoParqueRepository) {
-        this.productoParqueRepository = productoParqueRepository;
+    public ProductoParqueServiceImpl(ProductoParqueDAO dao,
+                                     ProductoCatalogoService productoCatalogoService) {
+        this.dao = dao;
+        this.productoCatalogoService = productoCatalogoService;
     }
 
     @Override
-    public List<ProductoParque> listarTodos() {
-        return productoParqueRepository.listarTodos();
+    public List<ProductoParque> listar() { return dao.listar(); }
+
+    @Override
+    public List<ProductoParque> listarActivosConStock() {
+        return dao.listarActivosConStock();
     }
 
     @Override
-    public List<ProductoParque> listarActivos() {
-        return productoParqueRepository.listarActivos();
+    public ProductoParque buscarPorProductoCatalogoId(int idProductoCatalogo) {
+        try { return dao.buscarPorProductoCatalogoId(idProductoCatalogo); }
+        catch (Exception e) { return null; }
     }
 
     @Override
-    public ProductoParque obtenerPorIdCatalogo(int idCatalogo) {
-        return productoParqueRepository.obtenerPorIdCatalogo(idCatalogo);
+    public void registrarIngreso(int idProductoCatalogo, int cantidad) {
+
+        ProductoParque p = buscarPorProductoCatalogoId(idProductoCatalogo);
+
+        if (p == null) {
+            ProductoCatalogo prod = productoCatalogoService.buscarPorId(idProductoCatalogo);
+            ProductoParque nuevo = new ProductoParque(0, prod, cantidad, true);
+            dao.guardar(nuevo);
+        } else {
+            p.setExistencias(p.getExistencias() + cantidad);
+            p.setActivo(true);
+            dao.actualizar(p);
+        }
     }
 
     @Override
-    public void actualizarStockPorMovimiento(int idCatalogo, int cantidad, double precioUnitario, boolean esIngreso) {
-        productoParqueRepository.actualizarStockPorMovimiento(idCatalogo, cantidad, precioUnitario, esIngreso);
+    public boolean registrarSalida(int idProductoCatalogo, int cantidad) {
+
+        ProductoParque p = buscarPorProductoCatalogoId(idProductoCatalogo);
+
+        if (p == null || p.getExistencias() < cantidad) {
+            return false;
+        }
+
+        int nuevaCantidad = p.getExistencias() - cantidad;
+
+        p.setExistencias(nuevaCantidad);
+        p.setActivo(nuevaCantidad > 0);
+
+        dao.actualizar(p);
+        return true;
     }
 
     @Override
-    public void cambiarEstado(int id) {
-        productoParqueRepository.cambiarEstado(id);
+    public void desactivar(int idProductoCatalogo) {
+        dao.desactivar(idProductoCatalogo);
     }
 
     @Override
-    public int contarBajoStock() {
-        return productoParqueRepository.contarBajoStock();
+    public void activar(int idProductoCatalogo) {
+        dao.activar(idProductoCatalogo);
     }
 
-    @Override
-    public int obtenerTotalUnidades() {
-        return productoParqueRepository.obtenerTotalUnidades();
-    }
 }

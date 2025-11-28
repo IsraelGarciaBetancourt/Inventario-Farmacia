@@ -4,19 +4,17 @@ import java.util.List;
 
 public interface ProductoCatalogoDAO {
 
-    // Listados
-    List<ProductoCatalogo> listarProductosCatalogo();
-    List<ProductoCatalogo> listarProductosCatalogoActivos();
+    List<ProductoCatalogo> listar();
 
-    // Obtener uno
-    ProductoCatalogo obtenerProductoCatalogoPorId(int id);
+    List<ProductoCatalogo> listarActivos();
 
-    // Persistencia
-    int guardarProductoCatalogo(ProductoCatalogo producto);
-    int actualizarProductoCatalogo(ProductoCatalogo producto);
+    ProductoCatalogo buscarPorId(int id);
 
-    // Desactivar (eliminar lógico)
-    int desactivarProductoCatalogo(int id);
-    int toggleProductoCatalogo(int id);
+    int guardar(ProductoCatalogo p);
 
+    int actualizar(ProductoCatalogo p);
+
+    int desactivar(int id);
+
+    int activar(int id);
 }

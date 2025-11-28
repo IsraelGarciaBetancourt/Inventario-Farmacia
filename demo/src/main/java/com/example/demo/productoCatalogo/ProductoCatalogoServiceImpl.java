@@ -1,48 +1,37 @@
 package com.example.demo.productoCatalogo;
 
 import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ProductoCatalogoServiceImpl implements ProductoCatalogoService {
 
-    @Autowired
-    private ProductoCatalogoRepository productoCatalogoRepository;
+    private final ProductoCatalogoDAO dao;
 
-    @Override
-    public List<ProductoCatalogo> listarProductosCatalogo() {
-        return productoCatalogoRepository.listarProductosCatalogo();
+    public ProductoCatalogoServiceImpl(ProductoCatalogoDAO dao) {
+        this.dao = dao;
     }
 
     @Override
-    public List<ProductoCatalogo> listarProductosCatalogoActivos() {
-        return productoCatalogoRepository.listarProductosCatalogoActivos();
+    public List<ProductoCatalogo> listar() { return dao.listar(); }
+
+    @Override
+    public List<ProductoCatalogo> listarActivos() {
+        return dao.listarActivos();
     }
 
     @Override
-    public ProductoCatalogo obtenerProductoCatalogoPorId(int id) {
-        return productoCatalogoRepository.obtenerProductoCatalogoPorId(id);
-    }
+    public ProductoCatalogo buscarPorId(int id) { return dao.buscarPorId(id); }
 
     @Override
-    public boolean guardarProductoCatalogo(ProductoCatalogo producto) {
-        return productoCatalogoRepository.guardarProductoCatalogo(producto) > 0;
-    }
+    public int guardar(ProductoCatalogo p) { return dao.guardar(p); }
 
     @Override
-    public boolean actualizarProductoCatalogo(ProductoCatalogo producto) {
-        return productoCatalogoRepository.actualizarProductoCatalogo(producto) > 0;
-    }
+    public int actualizar(ProductoCatalogo p) { return dao.actualizar(p); }
 
     @Override
-    public boolean toggleProductoCatalogo(int id) {
-        return productoCatalogoRepository.toggleProductoCatalogo(id) > 0;
-    }
+    public int desactivar(int id) { return dao.desactivar(id); }
 
     @Override
-    public boolean desactivarProductoCatalogo(int id) {
-        return productoCatalogoRepository.desactivarProductoCatalogo(id) > 0;
-    }
+    public int activar(int id) { return dao.activar(id); }
 }

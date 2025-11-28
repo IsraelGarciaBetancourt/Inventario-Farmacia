@@ -3,11 +3,15 @@ package com.example.demo.productoParque;
 import java.util.List;
 
 public interface ProductoParqueService {
-    List<ProductoParque> listarTodos();
-    List<ProductoParque> listarActivos();
-    ProductoParque obtenerPorIdCatalogo(int idCatalogo);
-    void actualizarStockPorMovimiento(int idCatalogo, int cantidad, double precioUnitario, boolean esIngreso);
-    void cambiarEstado(int id);
-    int contarBajoStock();
-    int obtenerTotalUnidades();
+
+    List<ProductoParque> listar();
+    List<ProductoParque> listarActivosConStock();
+
+    ProductoParque buscarPorProductoCatalogoId(int idProductoCatalogo);
+
+    void desactivar(int idProductoCatalogo);
+    void activar(int idProductoCatalogo);
+
+    void registrarIngreso(int idProductoCatalogo, int cantidad);
+    boolean registrarSalida(int idProductoCatalogo, int cantidad);
 }

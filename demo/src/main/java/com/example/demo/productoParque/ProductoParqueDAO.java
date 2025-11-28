@@ -3,9 +3,15 @@ package com.example.demo.productoParque;
 import java.util.List;
 
 public interface ProductoParqueDAO {
-    List<ProductoParque> listarActivos();
-    ProductoParque obtenerPorIdCatalogo(int idCatalogo);
-    int registrar(ProductoParque productoParque);
-    int actualizarExistencias(int idCatalogo, int nuevaCantidad, double nuevoValor);
-    int actualizarStockPorMovimiento(int idCatalogo, int cantidad, double precioUnitario, boolean esIngreso);
+
+    List<ProductoParque> listar();               // todos (activados e inactivos)
+    List<ProductoParque> listarActivosConStock(); // para salidas (solo activos y existencias > 0)
+    ProductoParque buscarPorProductoCatalogoId(int idProductoCatalogo);
+
+    int guardar(ProductoParque p);
+    int actualizar(ProductoParque p);
+
+    int desactivar(int idProductoCatalogo);
+    int activar(int idProductoCatalogo);
+
 }

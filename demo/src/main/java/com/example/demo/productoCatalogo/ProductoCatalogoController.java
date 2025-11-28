@@ -1,53 +1,64 @@
 package com.example.demo.productoCatalogo;
 
-import java.util.List;
-import com.example.demo.categoriaProducto.CategoriaProductoService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import com.example.demo.categoria.CategoriaService;
+
 @Controller
-@RequestMapping("/catalogo")
+@RequestMapping("/productoCatalogo")
 public class ProductoCatalogoController {
 
-    @Autowired
-    private ProductoCatalogoService productoCatalogoService;
+    private final ProductoCatalogoService service;
+    private final CategoriaService categoriaService;
 
-    @Autowired
-    private CategoriaProductoService categoriaProductoService;
+    public ProductoCatalogoController(ProductoCatalogoService service, CategoriaService categoriaService) {
+        this.service = service;
+        this.categoriaService = categoriaService;
+    }
 
-    @GetMapping
-    public String listarCatalogo(Model model) {
-        List<ProductoCatalogo> productos = productoCatalogoService.listarProductosCatalogo();
-        model.addAttribute("productos", productos);
+    @GetMapping("/list")
+    public String listar(Model model) {
+        model.addAttribute("productos", service.listar());
+        return "productoCatalogo/list";
+    }
 
-        // Cargar categorías activas para los modales
-        model.addAttribute("categorias", categoriaProductoService.listarCategoriasActivas());
-        return "catalogo/catalogo";
+    @GetMapping("/crear")
+    public String crear(Model model) {
+        model.addAttribute("producto", new ProductoCatalogo());
+        model.addAttribute("categorias", categoriaService.listar());
+        return "productoCatalogo/form";
+    }
+
+    @GetMapping("/editar/{id}")
+    public String editar(@PathVariable int id, Model model) {
+        model.addAttribute("producto", service.buscarPorId(id));
+        model.addAttribute("categorias", categoriaService.listar());
+        return "productoCatalogo/form";
     }
 
     @PostMapping("/guardar")
-    public String guardarProducto(@ModelAttribute ProductoCatalogo producto) {
-        productoCatalogoService.guardarProductoCatalogo(producto);
-        return "redirect:/catalogo";
+    public String guardar(@ModelAttribute ProductoCatalogo p) {
+        service.guardar(p);
+        return "redirect:/productoCatalogo/list";
     }
 
     @PostMapping("/actualizar")
-    public String actualizarProducto(@ModelAttribute ProductoCatalogo producto) {
-        productoCatalogoService.actualizarProductoCatalogo(producto);
-        return "redirect:/catalogo";
+    public String actualizar(@ModelAttribute ProductoCatalogo p) {
+        service.actualizar(p);
+        return "redirect:/productoCatalogo/list";
     }
 
-    @GetMapping("/toggle/{id}")
-    public String toggle(@PathVariable int id) {
-        productoCatalogoService.toggleProductoCatalogo(id);
-        return "redirect:/catalogo";
+    @GetMapping("/desactivar/{id}")
+    public String desactivar(@PathVariable int id) {
+        service.desactivar(id);
+        return "redirect:/productoCatalogo/list";
     }
 
-    @GetMapping("/eliminar/{id}")
-    public String desactivarProducto(@PathVariable int id) {
-        productoCatalogoService.desactivarProductoCatalogo(id);
-        return "redirect:/catalogo";
+    @GetMapping("/activar/{id}")
+    public String activar(@PathVariable int id) {
+        service.activar(id);
+        return "redirect:/productoCatalogo/list";
     }
 }
