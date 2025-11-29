@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 
 import com.example.demo.usuario.Usuario;
 
-public class Documento {
+    public class Documento {
 
     private int id;
     private String tipoMovimiento;   // INGRESO / SALIDA
