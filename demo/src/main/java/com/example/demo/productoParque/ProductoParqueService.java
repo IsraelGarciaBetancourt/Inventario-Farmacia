@@ -7,6 +7,8 @@ public interface ProductoParqueService {
     List<ProductoParque> listar();
     List<ProductoParque> listarActivosConStock();
 
+    List<ProductoParque> listarEnPeligro();
+
     ProductoParque buscarPorProductoCatalogoId(int idProductoCatalogo);
 
     void desactivar(int idProductoCatalogo);

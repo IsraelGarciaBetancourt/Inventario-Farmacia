@@ -22,6 +22,39 @@
             <h1>Inventario de Productos</h1>
         </header>
 
+        <c:if test="${not empty peligro}">
+            <div class="tarjeta">
+
+                <div class="alerta alerta-peligro mb-2">
+                    <strong>⚠ Atención:</strong> Hay productos con bajo stock (menos de 50 existencias).
+                </div>
+
+                <table class="tabla">
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Producto</th>
+                            <th>Existencias</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <c:forEach var="p" items="${peligro}">
+                        <tr>
+                            <td>${p.productoCatalogo.codigo}</td>
+                            <td>${p.productoCatalogo.nombre}</td>
+                            <td>
+                                <span class="insignia insignia-peligro">
+                                    ${p.existencias}
+                                </span>
+                            </td>
+                        </tr>
+                    </c:forEach>
+                    </tbody>
+                </table>
+
+            </div>
+        </c:if>
+
         <div class="tarjeta">
 
             <table class="tabla">

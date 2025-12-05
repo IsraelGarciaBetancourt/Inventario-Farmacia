@@ -27,6 +27,11 @@ public class ProductoParqueServiceImpl implements ProductoParqueService {
     }
 
     @Override
+    public List<ProductoParque> listarEnPeligro() {
+        return dao.listarEnPeligro();
+    }
+
+    @Override
     public ProductoParque buscarPorProductoCatalogoId(int idProductoCatalogo) {
         try { return dao.buscarPorProductoCatalogoId(idProductoCatalogo); }
         catch (Exception e) { return null; }

@@ -81,6 +81,26 @@ public class ProductoParqueRepository implements ProductoParqueDAO {
     }
 
     @Override
+    public List<ProductoParque> listarEnPeligro() {
+        String sql = """
+        SELECT 
+            pp.id AS parque_id,
+            pp.existencias,
+            pp.activo AS parque_activo,
+            pc.id AS prod_id,
+            pc.codigo,
+            pc.nombre AS prod_nombre,
+            pc.activo AS prod_activo
+        FROM producto_parque pp
+        JOIN producto_catalogo pc ON pc.id = pp.id_producto_catalogo
+        WHERE pp.existencias < 50
+        ORDER BY pp.existencias ASC
+    """;
+
+        return jdbc.query(sql, mapper);
+    }
+
+    @Override
     public ProductoParque buscarPorProductoCatalogoId(int idProductoCatalogo) {
         String sql = """
             SELECT 

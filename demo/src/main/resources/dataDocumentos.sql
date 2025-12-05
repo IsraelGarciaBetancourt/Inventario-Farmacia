@@ -226,18 +226,13 @@ VALUES (139, 3, 95, TRUE);
 
 -- Noviembre 2025
 INSERT INTO documentos (id, tipo_movimiento, numero_documento, fecha, id_usuario, observacion, activo)
-VALUES (140, 'INGRESO', 'ING-TEST-M7', '2025-11-15', 1, 'Ingreso Noviembre', TRUE);
+VALUES (140, 'INGRESO', 'ING-0011', '2025-11-15', 1, 'Ingreso Noviembre', TRUE);
 INSERT INTO documento_detalles (id_documento, id_producto_catalogo, cantidad, activo)
 VALUES (140, 4, 250, TRUE);
 INSERT INTO documentos (id, tipo_movimiento, numero_documento, fecha, id_usuario, observacion, activo)
-VALUES (141, 'SALIDA', 'SAL-TEST-M7', '2025-11-20', 1, 'Salida Noviembre', TRUE);
+VALUES (141, 'SALIDA', 'SAL-0011', '2025-11-20', 1, 'Salida Noviembre', TRUE);
 INSERT INTO documento_detalles (id_documento, id_producto_catalogo, cantidad, activo)
 VALUES (141, 4, 100, TRUE);
 
--- ============================================
--- RESUMEN DE PRUEBAS
--- ============================================
--- 7 DÍAS: Verás 7 puntos con datos diarios del 23 al 29 de noviembre
--- 7 SEMANAS: Verás 7 puntos con datos semanales de octubre a noviembre
--- 7 MESES: Verás 7 puntos con datos mensuales de mayo a noviembre
--- TOP 5: El producto 4 debería aparecer primero por tener más salidas
+
+ALTER TABLE documentos ALTER COLUMN id RESTART WITH 1000;

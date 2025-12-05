@@ -16,7 +16,8 @@ public class ProductoParqueController {
     @GetMapping("/inventario")
     public String listarInventario(Model model) {
         model.addAttribute("items", service.listar());
-        return "inventario/list"; // JSP que luego armamos
+        model.addAttribute("peligro", service.listarEnPeligro()); // NUEVO
+        return "inventario/list";
     }
 
     @GetMapping("/inventario/desactivar/{id}")
